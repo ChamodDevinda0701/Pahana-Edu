@@ -1,10 +1,7 @@
 package com.pahanaedu.dto;
 
 /**
- * Data Transfer Object (DTO) for Customer information.
- */
-/**
- * DTO for Customer info with accountNumber field.
+ * Data Transfer Object (DTO) for Customer information including accountNumber field.
  */
 public class CustomerDto {
     private String username;
@@ -13,16 +10,14 @@ public class CustomerDto {
     private String email;
     private String accountNumber;  // new field
 
-/**
- * DTO for Customer info with accountNumber field.
- */
-public class CustomerDto { public CustomerDto(String username, String password, String fullname, String email, String accountNumber) {
-    this.username = username;
-    this.password = password;
-    this.fullname = fullname;
-    this.email = email;
-    this.accountNumber = accountNumber;
-}
+    // Constructor
+    public CustomerDto(String username, String password, String fullname, String email, String accountNumber) {
+        this.username = username;
+        this.password = password;
+        this.fullname = fullname;
+        this.email = email;
+        this.accountNumber = accountNumber;
+    }
 
     // Getters and setters
 
@@ -60,4 +55,4 @@ public class CustomerDto { public CustomerDto(String username, String password, 
     public void setAccountNumber(String accountNumber) {
         this.accountNumber = accountNumber;
     }
-}}
+}
