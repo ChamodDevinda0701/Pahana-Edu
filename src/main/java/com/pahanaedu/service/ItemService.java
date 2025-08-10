@@ -1,5 +1,6 @@
 package com.pahanaedu.service;
 
+import com.pahanaedu.dao.ItemDao;
 import com.pahanaedu.dto.ItemDto;
 
 import java.io.*;
@@ -7,111 +8,153 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Service class to handle CRUD operations for items.
+ * Service class to handle business logic related to Items.
  */
 public class ItemService {
 
-    private static final String FILE_PATH = "items.txt";
+    private ItemDao itemDao;
+    private static final String ITEM_FILE = "items.txt";
+
+    public ItemService() {
+        this.itemDao = new ItemDao();
+    }
 
     /**
-     * Save an item to the file.
+     * Get item details by itemId.
+     *
+     * @param itemId Item ID
+     * @return ItemDto if found, else null
      */
-    public void saveItem(ItemDto item) {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_PATH, true))) {
-            writer.write(item.getItemCode() + "," + item.getItemName() + "," +
-                    item.getPrice() + "," + item.getQtyOnHand());
-            writer.newLine();
+    public ItemDto getItemById(String itemId) {
+        return itemDao.getItemById(itemId);
+    }
+
+    /**
+     * Add a new item by appending to the items file.
+     * Basic implementation; does not check for duplicates.
+     *
+     * @param item ItemDto to add
+     * @return true if added successfully, false otherwise
+     */
+    public boolean addItem(ItemDto item) {
+        if (item == null) return false;
+
+        // Optional: Check if item already exists
+        if (getItemById(item.getItemId()) != null) {
+            return false; // Item ID already exists
+        }
+
+        String line = String.join(",",
+                item.getItemId(),
+                item.getItemName(),
+                item.getItemDescription(),
+                String.valueOf(item.getItemPrice()));
+
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(ITEM_FILE, true))) {
+            bw.write(line);
+            bw.newLine();
+            bw.flush();
+            return true;
         } catch (IOException e) {
             e.printStackTrace();
+            return false;
         }
     }
 
     /**
-     * Get all items from the file.
+     * Update an existing item by rewriting the whole items file.
+     *
+     * @param updatedItem ItemDto with updated values
+     * @return true if updated, false if item not found or error
      */
-    public List<ItemDto> getAllItems() {
-        List<ItemDto> items = new ArrayList<>();
-        File file = new File(FILE_PATH);
+    public boolean updateItem(ItemDto updatedItem) {
+        if (updatedItem == null) return false;
 
-        if (!file.exists()) {
-            return items;
+        List<ItemDto> items = readAllItems();
+        boolean found = false;
+
+        for (int i = 0; i < items.size(); i++) {
+            if (items.get(i).getItemId().equals(updatedItem.getItemId())) {
+                items.set(i, updatedItem);
+                found = true;
+                break;
+            }
         }
 
-        try (BufferedReader reader = new BufferedReader(new FileReader(FILE_PATH))) {
+        if (!found) return false;
+
+        return writeAllItems(items);
+    }
+
+    /**
+     * Delete an item by itemId.
+     *
+     * @param itemId Item ID to delete
+     * @return true if deleted, false if not found or error
+     */
+    public boolean deleteItem(String itemId) {
+        List<ItemDto> items = readAllItems();
+        boolean removed = items.removeIf(item -> item.getItemId().equals(itemId));
+
+        if (!removed) return false;
+
+        return writeAllItems(items);
+    }
+
+    /**
+     * Reads all items from the file.
+     *
+     * @return List of ItemDto objects
+     */
+    private List<ItemDto> readAllItems() {
+        List<ItemDto> items = new ArrayList<>();
+        try (BufferedReader br = new BufferedReader(new FileReader(ITEM_FILE))) {
             String line;
-            while ((line = reader.readLine()) != null) {
-                String[] data = line.split(",");
-                if (data.length == 4) {
-                    items.add(new ItemDto(data[0], data[1],
-                            Double.parseDouble(data[2]),
-                            Integer.parseInt(data[3])));
+            while ((line = br.readLine()) != null) {
+                String[] parts = line.split(",");
+                if (parts.length == 4) {
+                    try {
+                        String itemId = parts[0].trim();
+                        String itemName = parts[1].trim();
+                        String itemDescription = parts[2].trim();
+                        double itemPrice = Double.parseDouble(parts[3].trim());
+
+                        ItemDto item = new ItemDto(itemId, itemName, itemDescription, itemPrice);
+                        items.add(item);
+                    } catch (NumberFormatException e) {
+                        // Skip invalid price lines
+                        e.printStackTrace();
+                    }
                 }
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
-
         return items;
     }
 
     /**
-     * Find an item by its code.
+     * Writes the full list of items back to the file.
+     *
+     * @param items List of items to write
+     * @return true if successful, false otherwise
      */
-    public ItemDto findItemByCode(String code) {
-        for (ItemDto item : getAllItems()) {
-            if (item.getItemCode().equalsIgnoreCase(code)) {
-                return item;
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Update an existing item by its code.
-     */
-    public boolean updateItem(ItemDto updatedItem) {
-        List<ItemDto> items = getAllItems();
-        boolean updated = false;
-
-        for (int i = 0; i < items.size(); i++) {
-            if (items.get(i).getItemCode().equalsIgnoreCase(updatedItem.getItemCode())) {
-                items.set(i, updatedItem);
-                updated = true;
-                break;
-            }
-        }
-
-        if (updated) {
-            saveAllItems(items);
-        }
-        return updated;
-    }
-
-    /**
-     * Delete an item by its code.
-     */
-    public boolean deleteItem(String code) {
-        List<ItemDto> items = getAllItems();
-        boolean removed = items.removeIf(item -> item.getItemCode().equalsIgnoreCase(code));
-
-        if (removed) {
-            saveAllItems(items);
-        }
-        return removed;
-    }
-
-    /**
-     * Save all items to the file (overwrites existing file).
-     */
-    private void saveAllItems(List<ItemDto> items) {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_PATH))) {
+    private boolean writeAllItems(List<ItemDto> items) {
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(ITEM_FILE, false))) {
             for (ItemDto item : items) {
-                writer.write(item.getItemCode() + "," + item.getItemName() + "," +
-                        item.getPrice() + "," + item.getQtyOnHand());
-                writer.newLine();
+                String line = String.join(",",
+                        item.getItemId(),
+                        item.getItemName(),
+                        item.getItemDescription(),
+                        String.valueOf(item.getItemPrice()));
+                bw.write(line);
+                bw.newLine();
             }
+            bw.flush();
+            return true;
         } catch (IOException e) {
             e.printStackTrace();
+            return false;
         }
     }
 }
