@@ -3,7 +3,7 @@ package com.pahanaedu.model;
 import java.io.Serializable;
 
 /**
- * Represents a single item in a bill, including quantity and price.
+ * Represents a single item in a bill.
  */
 public class BillItem implements Serializable {
 
@@ -15,9 +15,7 @@ public class BillItem implements Serializable {
     private double price;
     private double total;
 
-    public BillItem() {
-        // Default constructor
-    }
+    public BillItem() {}
 
     public BillItem(String itemCode, String itemName, int quantity, double price) {
         this.itemCode = itemCode;
@@ -27,7 +25,6 @@ public class BillItem implements Serializable {
         this.total = quantity * price;
     }
 
-    // Getters and Setters
     public String getItemCode() {
         return itemCode;
     }
@@ -50,7 +47,7 @@ public class BillItem implements Serializable {
 
     public void setQuantity(int quantity) {
         this.quantity = quantity;
-        this.total = this.quantity * this.price; // Auto-update total
+        this.total = this.quantity * this.price;
     }
 
     public double getPrice() {
@@ -59,7 +56,7 @@ public class BillItem implements Serializable {
 
     public void setPrice(double price) {
         this.price = price;
-        this.total = this.quantity * this.price; // Auto-update total
+        this.total = this.quantity * this.price;
     }
 
     public double getTotal() {

@@ -14,12 +14,10 @@ public class Bill implements Serializable {
     private String billId;
     private String customerAccountNumber;
     private LocalDateTime billDate;
-    private List<BillItem> billItems; // List of items purchased with quantity and price
+    private List<BillItem> billItems; // List of items purchased
     private double totalAmount;
 
-    public Bill() {
-        // Default constructor
-    }
+    public Bill() {}
 
     public Bill(String billId, String customerAccountNumber, LocalDateTime billDate, List<BillItem> billItems, double totalAmount) {
         this.billId = billId;
@@ -29,7 +27,6 @@ public class Bill implements Serializable {
         this.totalAmount = totalAmount;
     }
 
-    // Getters and Setters
     public String getBillId() {
         return billId;
     }

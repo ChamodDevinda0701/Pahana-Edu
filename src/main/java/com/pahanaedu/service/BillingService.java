@@ -1,44 +1,30 @@
 package com.pahanaedu.service;
 
 import com.pahanaedu.dto.BillDto;
+import com.pahanaedu.dto.CustomerDto;
 import com.pahanaedu.dto.ItemDto;
 
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Service class to manage billing operations.
  */
-
 public class BillingService {
 
-
-    /**
-     * Calculates the total amount for the bill.
-     *
-     * @param bill the BillDto object with items
-     * @return total amount
-     */
     public double calculateTotalAmount(BillDto bill) {
         if (bill == null || bill.getItems() == null) {
             return 0;
         }
         double total = 0;
         for (ItemDto item : bill.getItems()) {
-            total += item.getItemPrice();
+            total += item.getItemPrice() * item.getQuantity();
         }
         bill.setTotalAmount(total);
         return total;
     }
 
-    /**
-     * Creates a new BillDto with total calculated.
-     *
-     * @param billId the bill identifier
-     * @param customerId customer identifier
-     * @param items list of items in the bill
-     * @return BillDto with total amount and current date set
-     */
     public BillDto createBill(String billId, String customerId, List<ItemDto> items) {
         BillDto bill = new BillDto(billId, customerId, items, 0, new Date());
         double total = calculateTotalAmount(bill);
@@ -47,10 +33,19 @@ public class BillingService {
     }
 
     /**
-     * Prints a simple summary of the bill.
-     *
-     * @param bill the BillDto object
+     * New method for BillController.
      */
+    public BillDto calculateBill(CustomerDto customer) {
+        if (customer == null || customer.getPurchasedItems() == null) {
+            return null;
+        }
+        String billId = UUID.randomUUID().toString();
+        BillDto bill = new BillDto(billId, customer.getId(), customer.getPurchasedItems(), 0, new Date());
+        double total = calculateTotalAmount(bill);
+        bill.setTotalAmount(total);
+        return bill;
+    }
+
     public void printBillSummary(BillDto bill) {
         if (bill == null) {
             System.out.println("No bill available.");
@@ -61,9 +56,10 @@ public class BillingService {
         System.out.println("Date: " + bill.getBillDate());
         System.out.println("Items:");
         for (ItemDto item : bill.getItems()) {
-            System.out.printf(" - %s (%s): $%.2f%n", item.getItemName(), item.getItemId(), item.getItemPrice());
+            System.out.printf(" - %s (%s): $%.2f x %d%n",
+                    item.getItemName(), item.getItemId(),
+                    item.getItemPrice(), item.getQuantity());
         }
         System.out.printf("Total Amount: $%.2f%n", bill.getTotalAmount());
     }
-
 }
