@@ -8,9 +8,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
-/**
- * Service class to manage billing operations.
- */
 public class BillingService {
 
     public double calculateTotalAmount(BillDto bill) {
@@ -32,15 +29,13 @@ public class BillingService {
         return bill;
     }
 
-    /**
-     * New method for BillController.
-     */
     public BillDto calculateBill(CustomerDto customer) {
         if (customer == null || customer.getPurchasedItems() == null) {
             return null;
         }
         String billId = UUID.randomUUID().toString();
-        BillDto bill = new BillDto(billId, customer.getId(), customer.getPurchasedItems(), 0, new Date());
+        BillDto bill = new BillDto(billId, customer.getAccountNumber(),
+                customer.getPurchasedItems(), 0, new Date());
         double total = calculateTotalAmount(bill);
         bill.setTotalAmount(total);
         return bill;
@@ -52,7 +47,7 @@ public class BillingService {
             return;
         }
         System.out.println("Bill ID: " + bill.getBillId());
-        System.out.println("Customer ID: " + bill.getCustomerId());
+        System.out.println("Customer Account Number: " + bill.getCustomerId());
         System.out.println("Date: " + bill.getBillDate());
         System.out.println("Items:");
         for (ItemDto item : bill.getItems()) {

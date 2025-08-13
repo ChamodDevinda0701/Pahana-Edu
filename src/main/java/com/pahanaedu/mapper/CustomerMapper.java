@@ -13,14 +13,16 @@ public class CustomerMapper {
      */
     public static CustomerDto toCustomerDto(String[] fields) {
         if (fields == null || fields.length < 4) {
-            return null;  // or throw IllegalArgumentException
+            return null;
         }
-        String username = fields[0].trim();
-        String password = fields[1].trim();
-        String fullname = fields[2].trim();
-        String email = fields[3].trim();
 
-        return new CustomerDto(username, password, fullname, email);
+        CustomerDto customer = new CustomerDto();
+        customer.setUsername(fields[0].trim());
+        customer.setPassword(fields[1].trim());
+        customer.setFullname(fields[2].trim());
+        customer.setEmail(fields[3].trim());
+
+        return customer;
     }
 
     /**
@@ -34,10 +36,16 @@ public class CustomerMapper {
             return "";
         }
         return String.join(",",
-                customer.getUsername(),
-                customer.getPassword(),
-                customer.getFullname(),
-                customer.getEmail());
+                safeValue(customer.getUsername()),
+                safeValue(customer.getPassword()),
+                safeValue(customer.getFullname()),
+                safeValue(customer.getEmail()));
     }
 
+    /**
+     * Ensures null-safe string values.
+     */
+    private static String safeValue(String value) {
+        return value == null ? "" : value.trim();
+    }
 }

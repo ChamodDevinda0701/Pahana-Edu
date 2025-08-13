@@ -1,16 +1,20 @@
 package com.pahanaedu.dto;
 
-/**
- * Data Transfer Object (DTO) for Customer information including accountNumber field.
- */
+import java.util.List;
+
 public class CustomerDto {
     private String username;
     private String password;
     private String fullname;
     private String email;
-    private String accountNumber;  // new field
+    private String accountNumber;
+    private List<ItemDto> purchasedItems;
 
-    // Constructor
+    // No-arg constructor (required for mapping frameworks)
+    public CustomerDto() {
+    }
+
+    // Constructor without purchased items
     public CustomerDto(String username, String password, String fullname, String email, String accountNumber) {
         this.username = username;
         this.password = password;
@@ -19,8 +23,17 @@ public class CustomerDto {
         this.accountNumber = accountNumber;
     }
 
-    // Getters and setters
+    // Full constructor with purchased items
+    public CustomerDto(String username, String password, String fullname, String email, String accountNumber, List<ItemDto> purchasedItems) {
+        this.username = username;
+        this.password = password;
+        this.fullname = fullname;
+        this.email = email;
+        this.accountNumber = accountNumber;
+        this.purchasedItems = purchasedItems;
+    }
 
+    // Getters and Setters
     public String getUsername() {
         return username;
     }
@@ -54,5 +67,12 @@ public class CustomerDto {
     }
     public void setAccountNumber(String accountNumber) {
         this.accountNumber = accountNumber;
+    }
+
+    public List<ItemDto> getPurchasedItems() {
+        return purchasedItems;
+    }
+    public void setPurchasedItems(List<ItemDto> purchasedItems) {
+        this.purchasedItems = purchasedItems;
     }
 }
