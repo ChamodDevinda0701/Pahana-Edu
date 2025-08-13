@@ -1,10 +1,3 @@
-<%--
-  Created by IntelliJ IDEA.
-  User: DELL
-  Date: 8/12/2025
-  Time: 11:40 PM
-  To change this template use File | Settings | File Templates.
---%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
          pageEncoding="UTF-8"%>
 <%@ page import="java.util.*" %>
@@ -21,7 +14,7 @@
             padding: 0;
         }
         .container {
-            width: 480px;
+            width: 650px;
             margin: 50px auto;
             background: white;
             padding: 25px;
@@ -38,11 +31,24 @@
             color: #555;
         }
         input[type="text"], input[type="number"] {
-            width: 95%;
+            width: 100%;
             padding: 8px;
             border: 1px solid #ccc;
             border-radius: 4px;
             box-sizing: border-box;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        table th, table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        table th {
+            background-color: #f2f2f2;
         }
         .btn {
             margin-top: 20px;
@@ -67,7 +73,30 @@
             text-decoration: none;
             color: #2980b9;
         }
+        .add-row-btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        .add-row-btn:hover {
+            background-color: #2980b9;
+        }
     </style>
+    <script>
+        function addRow() {
+            let table = document.getElementById("itemsTable");
+            let row = table.insertRow(-1);
+            row.innerHTML = `
+                <td><input type="text" name="itemCode" required></td>
+                <td><input type="text" name="itemName" required></td>
+                <td><input type="number" name="quantity" min="1" required></td>
+                <td><input type="number" name="price" min="0" step="0.01" required></td>
+            `;
+        }
+    </script>
 </head>
 <body>
 
@@ -77,17 +106,28 @@
     <form action="BillController" method="post">
         <input type="hidden" name="action" value="create">
 
-        <label>Bill Number:</label>
-        <input type="text" name="billNumber" required>
+        <label>Bill ID:</label>
+        <input type="text" name="billId" required>
 
         <label>Customer Account Number:</label>
         <input type="text" name="customerAccountNumber" required>
 
-        <label>Item Code:</label>
-        <input type="text" name="itemCode" required>
-
-        <label>Quantity:</label>
-        <input type="number" name="quantity" min="1" required>
+        <h3>Bill Items</h3>
+        <table id="itemsTable">
+            <tr>
+                <th>Item Code</th>
+                <th>Item Name</th>
+                <th>Quantity</th>
+                <th>Price</th>
+            </tr>
+            <tr>
+                <td><input type="text" name="itemCode" required></td>
+                <td><input type="text" name="itemName" required></td>
+                <td><input type="number" name="quantity" min="1" required></td>
+                <td><input type="number" name="price" min="0" step="0.01" required></td>
+            </tr>
+        </table>
+        <button type="button" class="add-row-btn" onclick="addRow()">+ Add Item</button>
 
         <button type="submit" class="btn">Generate Bill</button>
     </form>
