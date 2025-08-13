@@ -29,4 +29,7 @@ public class CustomerService {
         }
         return null;
     }
+
+    public void deleteCustomer(String accountNumber) {
+    }
 }

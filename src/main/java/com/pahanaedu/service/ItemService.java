@@ -109,4 +109,9 @@ public class ItemService {
             return false;
         }
     }
+    // Inside ItemService.java
+    public List<ItemDto> getAllItems() {
+        return readAllItems();
+    }
+
 }

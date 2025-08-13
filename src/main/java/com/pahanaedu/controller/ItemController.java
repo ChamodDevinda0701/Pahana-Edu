@@ -7,7 +7,9 @@ import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.*;
 import java.io.IOException;
+import java.util.List;
 
+@WebServlet("/items")
 public class ItemController extends HttpServlet {
 
     private ItemService itemService;
@@ -15,22 +17,20 @@ public class ItemController extends HttpServlet {
     @Override
     public void init() throws ServletException {
         super.init();
-        itemService = new ItemService(); // Initialize your item service here
+        itemService = new ItemService(); // Initialize ItemService
     }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        // For example: display list of items or show add/edit form based on parameters
         String action = request.getParameter("action");
 
         if ("edit".equalsIgnoreCase(action)) {
-            // Load item for edit
             String itemId = request.getParameter("id");
             ItemDto item = itemService.getItemById(itemId);
             request.setAttribute("item", item);
             request.getRequestDispatcher("/jsp/itemForm.jsp").forward(request, response);
+
         } else if ("delete".equalsIgnoreCase(action)) {
-            // Delete the item
             String itemId = request.getParameter("id");
             boolean deleted = itemService.deleteItem(itemId);
             if (deleted) {
@@ -38,17 +38,21 @@ public class ItemController extends HttpServlet {
             } else {
                 request.setAttribute("errorMessage", "Failed to delete item.");
             }
+            // Fetch all items to display
+            List<ItemDto> items = itemService.getAllItems();
+            request.setAttribute("items", items);
             request.getRequestDispatcher("/jsp/itemList.jsp").forward(request, response);
+
         } else {
             // Default: show all items
-            request.setAttribute("items", itemService.getAllItems());
+            List<ItemDto> items = itemService.getAllItems();
+            request.setAttribute("items", items);
             request.getRequestDispatcher("/jsp/itemList.jsp").forward(request, response);
         }
     }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        // Handle add or update item based on presence of id
         String itemId = request.getParameter("id");
         String itemName = request.getParameter("name");
         String itemDescription = request.getParameter("description");
@@ -64,10 +68,10 @@ public class ItemController extends HttpServlet {
         }
 
         ItemDto item = new ItemDto();
-        item.setId(itemId);
-        item.setName(itemName);
-        item.setDescription(itemDescription);
-        item.setPrice(price);
+        item.setItemId(itemId);
+        item.setItemName(itemName);
+        item.setItemDescription(itemDescription);
+        item.setItemPrice(price);
 
         boolean success;
         if (itemId == null || itemId.isEmpty()) {

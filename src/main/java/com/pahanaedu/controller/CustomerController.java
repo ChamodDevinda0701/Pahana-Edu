@@ -7,7 +7,9 @@ import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.*;
 import java.io.IOException;
+import java.util.List;
 
+@WebServlet("/customers") // Servlet mapping
 public class CustomerController extends HttpServlet {
 
     private CustomerService customerService;
@@ -19,11 +21,12 @@ public class CustomerController extends HttpServlet {
     }
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
         String action = request.getParameter("action");
 
         if ("edit".equalsIgnoreCase(action)) {
-            // Show form to edit customer details
             String accountNumber = request.getParameter("accountNumber");
             CustomerDto customer = customerService.getCustomerByAccountNumber(accountNumber);
             if (customer != null) {
@@ -33,45 +36,50 @@ public class CustomerController extends HttpServlet {
                 request.setAttribute("errorMessage", "Customer not found.");
                 listCustomers(request, response);
             }
+
+        } else if ("delete".equalsIgnoreCase(action)) {
+            String accountNumber = request.getParameter("accountNumber");
+            boolean deleted = customerService.deleteCustomer(accountNumber);
+            if (deleted) {
+                request.setAttribute("message", "Customer deleted successfully.");
+            } else {
+                request.setAttribute("errorMessage", "Failed to delete customer.");
+            }
+            listCustomers(request, response);
+
         } else {
-            // Default: list all customers
+            // Default action: list all customers
             listCustomers(request, response);
         }
     }
 
-    private void listCustomers(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        request.setAttribute("customers", customerService.getAllCustomers());
+    private void listCustomers(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        List<CustomerDto> customers = customerService.getAllCustomers();
+        request.setAttribute("customers", customers);
         request.getRequestDispatcher("/jsp/customerList.jsp").forward(request, response);
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        // Handle add or update customer based on presence of accountNumber parameter
-        String accountNumber = request.getParameter("accountNumber");
-        String name = request.getParameter("name");
-        String address = request.getParameter("address");
-        String telephone = request.getParameter("telephone");
-        String unitsConsumedStr = request.getParameter("unitsConsumed");
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
 
-        int unitsConsumed = 0;
-        try {
-            unitsConsumed = Integer.parseInt(unitsConsumedStr);
-        } catch (NumberFormatException e) {
-            request.setAttribute("errorMessage", "Units Consumed must be a valid number.");
-            request.getRequestDispatcher("/jsp/customerForm.jsp").forward(request, response);
-            return;
-        }
+        String accountNumber = request.getParameter("accountNumber");
+        String username = request.getParameter("username");
+        String password = request.getParameter("password");
+        String fullname = request.getParameter("fullname");
+        String email = request.getParameter("email");
 
         CustomerDto customer = new CustomerDto();
         customer.setAccountNumber(accountNumber);
-        customer.setName(name);
-        customer.setAddress(address);
-        customer.setTelephone(telephone);
-        customer.setUnitsConsumed(unitsConsumed);
+        customer.setUsername(username);
+        customer.setPassword(password);
+        customer.setFullname(fullname);
+        customer.setEmail(email);
 
         boolean success;
         if (accountNumber == null || accountNumber.trim().isEmpty()) {
-            // Add new customer - generate unique account number (optional: generate here or in service)
+            // Add new customer
             success = customerService.addCustomer(customer);
         } else {
             // Update existing customer
@@ -85,5 +93,4 @@ public class CustomerController extends HttpServlet {
             request.getRequestDispatcher("/jsp/customerForm.jsp").forward(request, response);
         }
     }
-
 }
