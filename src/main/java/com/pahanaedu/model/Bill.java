@@ -14,7 +14,7 @@ public class Bill implements Serializable {
     private String billId;
     private String customerAccountNumber;
     private LocalDateTime billDate;
-    private List<BillItem> billItems;  // List of items purchased with quantity and price
+    private List<BillItem> billItems; // List of items purchased with quantity and price
     private double totalAmount;
 
     public Bill() {
@@ -30,7 +30,6 @@ public class Bill implements Serializable {
     }
 
     // Getters and Setters
-
     public String getBillId() {
         return billId;
     }
